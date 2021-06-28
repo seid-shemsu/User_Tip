@@ -1,9 +1,9 @@
 package com.izhar.usertip;
 
 public class Game {
-    String league, home, away, date, status, tip, tip_type;
+    String league, home, away, date, status, tip, tip_type, odd, time;
 
-    public Game(String league, String home, String away, String date, String status, String tip, String tip_type) {
+    public Game(String league, String home, String away, String date, String status, String tip, String tip_type, String odd, String time) {
         this.league = league;
         this.home = home;
         this.away = away;
@@ -11,8 +11,20 @@ public class Game {
         this.status = status;
         this.tip = tip;
         this.tip_type = tip_type;
+        this.odd = odd;
+        this.time = time;
     }
+
+
     public Game(){}
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
 
     public String getLeague() {
         return league;
@@ -68,5 +80,13 @@ public class Game {
 
     public void setTip_type(String tip_type) {
         this.tip_type = tip_type;
+    }
+
+    public String getOdd() {
+        return odd;
+    }
+
+    public void setOdd(String odd) {
+        this.odd = odd;
     }
 }

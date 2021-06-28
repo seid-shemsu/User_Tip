@@ -16,4 +16,22 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:id="@+id/progress"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textColor="@color/black"
+        android:text="today's tips are not posted yet. Please try later."
+        android:visibility="gone"
+        android:id="@+id/not_posted"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textColor="@color/black"
+        android:text="Your account is not verified yet.\nPlease press settings icon at top right corner and send a request."
+        android:visibility="gone"
+        android:layout_marginHorizontal="25dp"
+        android:gravity="center"
+        android:id="@+id/not_verified"/>
 </RelativeLayout>

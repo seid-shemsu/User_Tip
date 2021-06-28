@@ -23,9 +23,4 @@
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
 
-    <fragment
-        android:id="@+id/profile"
-        android:name="com.izhar.usertip.ui.profile.ProfileFragment"
-        android:label="profile"
-        tools:layout="@layout/fragment_profile"/>
 </navigation>

@@ -22,7 +22,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Holder> {
     @NonNull
     @Override
     public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.single_game, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.single_tip, parent, false);
         return new Holder(view);
     }
 
@@ -31,11 +31,10 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Holder> {
         Game game = games.get(position);
         holder.home.setText(game.getHome());
         holder.away.setText(game.getAway());
-        holder.status.setText(game.getStatus());
-        holder.tip_type.setText(game.getTip_type());
-        holder.tip.setText(game.getTip());
+        holder.tip.setText(game.getTip_type() + " : " + game.getTip());
         holder.date.setText(game.getDate());
         holder.league.setText(game.getLeague());
+        holder.odd.setText("odd : " + game.getOdd());
     }
 
     @Override
@@ -44,16 +43,15 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Holder> {
     }
 
     class Holder extends RecyclerView.ViewHolder {
-        TextView home, away, status, tip, tip_type, date, league;
+        TextView home, away, tip, date, league, odd;
         public Holder(@NonNull View itemView) {
             super(itemView);
             home = itemView.findViewById(R.id.home);
             away = itemView.findViewById(R.id.away);
-            status = itemView.findViewById(R.id.status);
             tip = itemView.findViewById(R.id.tip);
-            tip_type = itemView.findViewById(R.id.tip_type);
             date = itemView.findViewById(R.id.date);
             league = itemView.findViewById(R.id.league);
+            odd = itemView.findViewById(R.id.odd);
         }
     }
 }

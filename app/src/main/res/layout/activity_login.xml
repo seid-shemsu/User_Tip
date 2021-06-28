@@ -67,7 +67,6 @@
                 android:layout_marginVertical="15dp"
                 android:background="@drawable/round"
                 android:backgroundTint="@color/white"
-                android:onClick="login"
                 android:paddingHorizontal="20dp"
                 android:text="login" />
         </LinearLayout>

@@ -19,7 +19,7 @@ public class Profile extends AppCompatActivity {
     }
 
     public void update(View view) {
-        startActivity(new Intent(this, MainActivity2.class));
+        startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 }

@@ -81,7 +81,6 @@
                 android:layout_marginVertical="15dp"
                 android:background="@drawable/round"
                 android:backgroundTint="@color/white"
-                android:onClick="register"
                 android:paddingHorizontal="20dp"
                 android:text="Register" />
         </LinearLayout>
