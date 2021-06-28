@@ -9,13 +9,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.UserTip">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity2"
+            android:label="@string/title_activity_main2"
+            android:theme="@style/Theme.UserTip.NoActionBar">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".auth.Verify" />
+        <activity android:name=".user.Profile" />
+        <activity android:name=".auth.Register" />
+        <activity android:name=".auth.Login">
+        </activity>
+        <activity android:name=".Vip" />
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>
