@@ -1,6 +1,7 @@
 package com.izhar.usertip.auth;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -19,8 +20,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.izhar.usertip.R;
 
 public class Register extends AppCompatActivity {
-    EditText email, phone, password;
-    Button register;
+    private EditText email, phone, password;
+    private Button register;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +76,8 @@ public class Register extends AppCompatActivity {
                         users.child(authResult.getUser().getUid()).child("password").setValue(password.getText().toString());
                         users.child(authResult.getUser().getUid()).child("email").setValue(email.getText().toString());
                         users.child(authResult.getUser().getUid()).child("uid").setValue(authResult.getUser().getUid());
+                        users.child(authResult.getUser().getUid()).child("account_status").setValue("Not Active");
+                        users.child(authResult.getUser().getUid()).child("expire_date").setValue("Not Set");
                         startActivity(new Intent(Register.this, Verify.class)
                                 .putExtra("phone", phone.getText().toString()));
                         finish();

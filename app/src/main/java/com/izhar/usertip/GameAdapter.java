@@ -35,6 +35,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Holder> {
         holder.date.setText(game.getDate());
         holder.league.setText(game.getLeague());
         holder.odd.setText("odd : " + game.getOdd());
+        holder.time.setText(game.getTime());
     }
 
     @Override
@@ -43,7 +44,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Holder> {
     }
 
     class Holder extends RecyclerView.ViewHolder {
-        TextView home, away, tip, date, league, odd;
+        TextView home, away, tip, date, league, odd, time;
         public Holder(@NonNull View itemView) {
             super(itemView);
             home = itemView.findViewById(R.id.home);
@@ -52,6 +53,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Holder> {
             date = itemView.findViewById(R.id.date);
             league = itemView.findViewById(R.id.league);
             odd = itemView.findViewById(R.id.odd);
+            time = itemView.findViewById(R.id.time);
         }
     }
 }

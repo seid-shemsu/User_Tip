@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.getValue().toString().equalsIgnoreCase("verified")){
-                            load();
+                                load();
                         }
                         else {
                             not_verified.setVisibility(View.VISIBLE);
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-
+                        Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
-        return false;
+        return true;
     }
 
     @Override
@@ -86,14 +87,14 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.settings){
             startActivity(new Intent(this, Settings.class));
         }
-        return false;
+        return true;
     }
 
     private void load(){
         games = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
-        data = FirebaseDatabase.getInstance().getReference(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
+        data = FirebaseDatabase.getInstance().getReference("vip").child(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
         data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
