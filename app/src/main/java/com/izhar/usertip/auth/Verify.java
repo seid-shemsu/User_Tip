@@ -19,9 +19,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.izhar.usertip.MainActivity;
 import com.izhar.usertip.R;
 import com.izhar.usertip.user.Profile;
 
@@ -53,19 +50,16 @@ public class Verify extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("profile", MODE_PRIVATE);
         prefs.edit().putString("phone", phoneNumber).apply();
 
-        buttonSignIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonSignIn.setOnClickListener(v -> {
 
-                String code = editText.getText().toString().trim();
+            String code = editText.getText().toString().trim();
 
-                if (code.isEmpty() || code.length() < 6) {
-                    editText.setError("Enter code...");
-                    editText.requestFocus();
-                    return;
-                }
-                verifyCode(code);
+            if (code.isEmpty() || code.length() < 6) {
+                editText.setError("Enter code...");
+                editText.requestFocus();
+                return;
             }
+            verifyCode(code);
         });
     }
     private void verifyCode(String code) {
@@ -79,17 +73,14 @@ public class Verify extends AppCompatActivity {
     }
     private void signInWithCredential(PhoneAuthCredential credential) {
         mAuth.getCurrentUser().linkWithCredential(credential)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Intent intent = new Intent(Verify.this, Profile.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            Toast.makeText(Verify.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                            progressBar.setVisibility(View.GONE);
-                        }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Intent intent = new Intent(Verify.this, Profile.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(Verify.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
     }

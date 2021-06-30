@@ -1,29 +1,28 @@
 package com.izhar.usertip.auth;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.AuthResult;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.izhar.usertip.MainActivity;
-import com.izhar.usertip.MainActivity2;
 import com.izhar.usertip.R;
-import com.izhar.usertip.user.Profile;
 
 public class Login extends AppCompatActivity {
-
+    private Dialog loading;
     EditText email, password;
     Button login;
     @Override
@@ -33,12 +32,13 @@ public class Login extends AppCompatActivity {
         email = findViewById(R.id.email);
         password = findViewById(R.id.password);
         login = findViewById(R.id.login);
-
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        login.setOnClickListener(v -> {
+            if (isConnected()){
                 if (check())
                     login(login);
+            }
+            else{
+                Snackbar.make(login, "Check your connection", BaseTransientBottomBar.LENGTH_SHORT).show();
             }
         });
     }
@@ -61,27 +61,41 @@ public class Login extends AppCompatActivity {
     }
 
     public void login(View view) {
+        showLoading();
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        DatabaseReference users = FirebaseDatabase.getInstance().getReference("users");
         login.setEnabled(false);
         email.setEnabled(false);
         password.setEnabled(false);
         auth.signInWithEmailAndPassword(email.getText().toString(), password.getText().toString())
-                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                    @Override
-                    public void onSuccess(AuthResult authResult) {
-                        startActivity(new Intent(Login.this, MainActivity.class));
-                        finish();
-                    }
+                .addOnSuccessListener(authResult -> {
+                    startActivity(new Intent(Login.this, MainActivity.class));
+                    finish();
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(Login.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                        email.setEnabled(true);
-                        password.setEnabled(true);
-                        login.setEnabled(true);
-                    }
+                .addOnFailureListener(e -> {
+                    loading.dismiss();
+                    Toast.makeText(Login.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    email.setEnabled(true);
+                    password.setEnabled(true);
+                    login.setEnabled(true);
                 });
+    }
+    public boolean isConnected(){
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo[] info = connectivityManager.getAllNetworkInfo();
+        int connected = 0;
+        for (NetworkInfo networkInfo : info) {
+            if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
+                connected = 1;
+            }
+        }
+        return connected == 1;
+    }
+    private void showLoading(){
+        loading = new Dialog(this);
+        loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        loading.setCancelable(false);
+        loading.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        loading.setContentView(R.layout.loading);
+        loading.show();
     }
 }

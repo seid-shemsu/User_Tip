@@ -43,7 +43,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.Holder> {
         return games.size();
     }
 
-    class Holder extends RecyclerView.ViewHolder {
+    static class Holder extends RecyclerView.ViewHolder {
         TextView home, away, tip, date, league, odd, time;
         public Holder(@NonNull View itemView) {
             super(itemView);

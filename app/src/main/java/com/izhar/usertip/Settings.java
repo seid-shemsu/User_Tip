@@ -1,80 +1,87 @@
 package com.izhar.usertip;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnSuccessListener;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Set;
 
 public class Settings extends AppCompatActivity {
-
-    private Button request, complain;
+    private Dialog loading;
+    private Button request;
     private TextView name, phone, account_status, expire_date;
     private ImageView profile, txn;
     private Uri imgUri;
-    private SharedPreferences complain_timeout;
+    private SharedPreferences timeout;
+    private DatabaseReference database;
+    private StorageReference storage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        complain_timeout = getSharedPreferences("complain_timeout", MODE_PRIVATE);
+        timeout = getSharedPreferences("timeout", MODE_PRIVATE);
+
+
         init();
         setData();
         String now = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        String time = complain_timeout.getString("time", "2020-10-10");
-        if (now.equalsIgnoreCase(time))
-            complain.setEnabled(false);
-        complain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                complain.setEnabled(false);
-                DatabaseReference complain = FirebaseDatabase.getInstance().getReference("complains");
-                complain.child(FirebaseAuth.getInstance().getUid()).child(new SimpleDateFormat("MM-dd-yyy").format(new Date()))
-                        .setValue(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                complain_timeout.edit().putString("time", new SimpleDateFormat("yyyy-MM-dd").format(new Date())).apply();
-                                Toast.makeText(Settings.this, "complain requested successfully", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-            }
-        });
-        txn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFileChooser();
-            }
-        });
-        request.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (imgUri == null)
-                    Toast.makeText(Settings.this, "please attach the required photo", Toast.LENGTH_SHORT).show();
-                else {
+        String activation_time = timeout.getString("activation", "2020-10-10");
+        if (now.equalsIgnoreCase(activation_time))
+            request.setEnabled(false);
+        txn.setOnClickListener(v -> openFileChooser());
+        request.setOnClickListener(v -> {
+            if (imgUri == null)
+                Snackbar.make(v, "please attach the required photo", BaseTransientBottomBar.LENGTH_SHORT).show();
+            else {
+                showLoading();
+                String id = new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + "__" + FirebaseAuth.getInstance().getUid();
+                storage = FirebaseStorage.getInstance().getReference("payment_requests").child(id);
+                storage.putFile(imgUri)
+                        .addOnSuccessListener(taskSnapshot -> storage.getDownloadUrl()
+                                .addOnSuccessListener(uri -> {
+                                    String phone = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+                                    String time = new SimpleDateFormat("MM-dd - hh:mm").format(new Date());
+                                    database = FirebaseDatabase.getInstance().getReference("payment_requests").child(id);
+                                    database.child("id").setValue(FirebaseAuth.getInstance().getUid());
+                                    database.child("photo").setValue(uri.toString());
+                                    database.child("time").setValue(time);
+                                    database.child("phone").setValue(phone);
+                                    loading.dismiss();
+                                    request.setEnabled(false);
+                                    timeout.edit().putString("activation", new SimpleDateFormat("yyyy-MM-dd").format(new Date())).apply();
+                                    Snackbar.make(v, "Your request sent successfully", BaseTransientBottomBar.LENGTH_SHORT).show();
+                                }))
+                        .addOnFailureListener(e -> Toast.makeText(Settings.this, e.getMessage(), Toast.LENGTH_SHORT).show());
 
-                }
             }
         });
     }
@@ -103,7 +110,6 @@ public class Settings extends AppCompatActivity {
 
     private void init() {
         request = findViewById(R.id.btn_send_request);
-        complain = findViewById(R.id.btb_send_complain);
 
         name = findViewById(R.id.name);
         phone = findViewById(R.id.phone);
@@ -112,31 +118,51 @@ public class Settings extends AppCompatActivity {
 
         profile = findViewById(R.id.user_profile);
         txn = findViewById(R.id.txn_image);
+
     }
 
-    private void openFileChooser(){
+    private void openFileChooser() {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(intent, 1001);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1001 && resultCode == RESULT_OK && data != null && data.getData() != null){
+        if (requestCode == 1001 && resultCode == RESULT_OK && data != null && data.getData() != null) {
             imgUri = data.getData();
             Picasso.Builder builder = new Picasso.Builder(this);
-            builder.listener(new Picasso.Listener() {
-                @Override
-                public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-                    Toast.makeText(Settings.this, ""+exception.toString(), Toast.LENGTH_SHORT).show();
-                }
-            });
-            builder.build().load(imgUri).into(profile);
-        }
-        else {
+            builder.listener((picasso, uri, exception) -> Toast.makeText(Settings.this, "" + exception.toString(), Toast.LENGTH_SHORT).show());
+            builder.build().load(imgUri).into(txn);
+        } else {
             Toast.makeText(this, "" + resultCode, Toast.LENGTH_SHORT).show();
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.logout, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.logout) {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(this, MainActivity2.class));
+            finish();
+        }
+        return true;
+    }
+
+    private void showLoading() {
+        loading = new Dialog(this);
+        loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        loading.setCancelable(false);
+        loading.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        loading.setContentView(R.layout.loading);
+        loading.show();
+    }
 }

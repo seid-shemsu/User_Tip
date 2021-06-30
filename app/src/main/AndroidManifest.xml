@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.izhar.usertip">
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,8 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.UserTip">
-        <activity android:name=".Settings">
-        </activity>
+        <activity android:name=".Settings"/>
         <activity
             android:name=".MainActivity2"
             android:theme="@style/Theme.UserTip.NoActionBar">
@@ -23,8 +25,7 @@
         <activity android:name=".auth.Verify" />
         <activity android:name=".user.Profile" />
         <activity android:name=".auth.Register" />
-        <activity android:name=".auth.Login"></activity>
-        <activity android:name=".Vip" />
+        <activity android:name=".auth.Login" />
         <activity android:name=".MainActivity" />
     </application>
 

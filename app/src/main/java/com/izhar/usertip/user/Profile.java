@@ -1,30 +1,23 @@
 package com.izhar.usertip.user;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.izhar.usertip.MainActivity;
-import com.izhar.usertip.MainActivity2;
 import com.izhar.usertip.R;
-import com.izhar.usertip.Settings;
 import com.squareup.picasso.Picasso;
 
 public class Profile extends AppCompatActivity {
@@ -45,41 +38,20 @@ public class Profile extends AppCompatActivity {
         name = findViewById(R.id.name);
         database = FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getUid());
         storage = FirebaseStorage.getInstance().getReference("users").child(FirebaseAuth.getInstance().getUid());
-        image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFileChooser();
-            }
-        });
-        update.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (check()){
-                    name.setEnabled(false);
-                    update.setEnabled(false);
-                    image.setEnabled(false);
-                    storage.putFile(imgUri)
-                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                    storage.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                        @Override
-                                        public void onSuccess(Uri uri) {
-                                            database.child("name").setValue(name.getText().toString());
-                                            database.child("image").setValue(uri.toString());
-                                            startActivity(new Intent(Profile.this, MainActivity.class));
-                                            finish();
-                                        }
-                                    });
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(Profile.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                }
+        image.setOnClickListener(v -> openFileChooser());
+        update.setOnClickListener(v -> {
+            if (check()){
+                name.setEnabled(false);
+                update.setEnabled(false);
+                image.setEnabled(false);
+                storage.putFile(imgUri)
+                        .addOnSuccessListener(taskSnapshot -> storage.getDownloadUrl().addOnSuccessListener(uri -> {
+                            database.child("name").setValue(name.getText().toString());
+                            database.child("image").setValue(uri.toString());
+                            startActivity(new Intent(Profile.this, MainActivity.class));
+                            finish();
+                        }))
+                        .addOnFailureListener(e -> Toast.makeText(Profile.this, e.getMessage(), Toast.LENGTH_SHORT).show());
             }
         });
     }
@@ -109,12 +81,7 @@ public class Profile extends AppCompatActivity {
         if (requestCode == 1001 && resultCode == RESULT_OK && data != null && data.getData() != null){
             imgUri = data.getData();
             Picasso.Builder builder = new Picasso.Builder(this);
-            builder.listener(new Picasso.Listener() {
-                @Override
-                public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-                    Toast.makeText(Profile.this, ""+exception.toString(), Toast.LENGTH_SHORT).show();
-                }
-            });
+            builder.listener((picasso, uri, exception) -> Toast.makeText(Profile.this, ""+exception.toString(), Toast.LENGTH_SHORT).show());
             builder.build().load(imgUri).into(image);
         }
         else {
