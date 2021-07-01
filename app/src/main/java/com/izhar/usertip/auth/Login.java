@@ -19,6 +19,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.izhar.usertip.MainActivity;
+import com.izhar.usertip.MainActivity2;
 import com.izhar.usertip.R;
 
 public class Login extends AppCompatActivity {
@@ -97,5 +98,11 @@ public class Login extends AppCompatActivity {
         loading.requestWindowFeature(Window.FEATURE_NO_TITLE);
         loading.setContentView(R.layout.loading);
         loading.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(this, MainActivity2.class));
+        finish();
     }
 }

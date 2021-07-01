@@ -8,9 +8,14 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +44,8 @@ import java.util.List;
 import static android.content.Context.CONNECTIVITY_SERVICE;
 
 public class HomeFragment extends Fragment {
+
+    private String today = "";
     private Dialog loading;
     private List<Game> games;
     private GameAdapter adapter;
@@ -48,20 +55,23 @@ public class HomeFragment extends Fragment {
     private View root;
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_home, container, false);
+        setHasOptionsMenu(true);
         showLoading();
+        today = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
         init();
-        load();
+        load(today);
         return root;
     }
     private void init() {
         recyclerView = root.findViewById(R.id.recycler);
         not_posted = root.findViewById(R.id.not_posted);
     }
-    private void load(){
+    private void load(String today) {
         games = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
-        data = FirebaseDatabase.getInstance().getReference("tips").child(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
+        recyclerView.setAdapter(null);
+        data = FirebaseDatabase.getInstance().getReference("tips").child(today);
         data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -87,7 +97,6 @@ public class HomeFragment extends Fragment {
             }
         });
     }
-
 
     private void showLoading(){
         loading = new Dialog(getContext());

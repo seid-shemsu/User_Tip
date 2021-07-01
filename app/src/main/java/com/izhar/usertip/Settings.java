@@ -71,7 +71,7 @@ public class Settings extends AppCompatActivity {
                                     String phone = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
                                     String time = new SimpleDateFormat("MM-dd - hh:mm").format(new Date());
                                     database = FirebaseDatabase.getInstance().getReference("payment_requests").child(id);
-                                    database.child("id").setValue(FirebaseAuth.getInstance().getUid());
+                                    database.child("id").setValue(id);
                                     database.child("photo").setValue(uri.toString());
                                     database.child("time").setValue(time);
                                     database.child("phone").setValue(phone);
@@ -164,5 +164,11 @@ public class Settings extends AppCompatActivity {
         loading.requestWindowFeature(Window.FEATURE_NO_TITLE);
         loading.setContentView(R.layout.loading);
         loading.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 }

@@ -5,9 +5,14 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -30,6 +35,8 @@ import java.util.List;
 
 
 public class SlideshowFragment extends Fragment {
+
+    private String today = "";
     private Dialog loading;
     private List<Game> games;
     private GameAdapter adapter;
@@ -39,19 +46,22 @@ public class SlideshowFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_slideshow, container, false);
         showLoading();
+        setHasOptionsMenu(true);
+        today = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
         init();
-        load();
+        load(today);
         return root;
     }
     private void init() {
         recyclerView = root.findViewById(R.id.recycler);
         not_posted = root.findViewById(R.id.not_posted);
     }
-    private void load(){
+    private void load(String today){
         games = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
-        DatabaseReference data = FirebaseDatabase.getInstance().getReference("histories").child(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
+        recyclerView.setAdapter(null);
+        DatabaseReference data = FirebaseDatabase.getInstance().getReference("history").child(today);
         data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -74,6 +84,37 @@ public class SlideshowFragment extends Fragment {
 
             }
         });
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.date, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.date){
+            final Dialog dialog = new Dialog(getContext());
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.date_picker);
+            dialog.setCanceledOnTouchOutside(false);
+            final DatePicker datePicker = dialog.findViewById(R.id.date_picker);
+            Button ok = dialog.findViewById(R.id.ok);
+            ok.setOnClickListener(v -> {
+                String day = datePicker.getDayOfMonth() + "";
+                String month = datePicker.getMonth()+1 + "";
+                if (day.length() == 1 )
+                    day = "0" + day;
+                if (month.length() == 1 )
+                    month = "0" + month;
+                today = day + "-" + month + "-" + datePicker.getYear();
+                load(today);
+                dialog.dismiss();
+            });
+            dialog.show();
+        }
+        return true;
     }
 
     private void showLoading(){

@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:textColor="@color/black"
-        android:text="today's history are not posted yet. Please try later."
+        android:text="histories of this day are not posted."
         android:visibility="gone"
         android:id="@+id/not_posted"/>
 </RelativeLayout>
