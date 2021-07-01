@@ -107,25 +107,38 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight=".5"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:layout_margin="5dp">
-                <TextView
-                    android:id="@+id/tip"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight=".5"
-                    android:text="tip: both team to score"
-                    android:textStyle="bold"
-                    android:gravity="center"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="75"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/odd"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight=".5"
-                    android:text="odd 1.4"
-                    android:gravity="center"/>
+                    <TextView
+                        android:id="@+id/tip"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight=".5"
+                        android:text="tip: both team to score"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+                    <TextView
+                        android:id="@+id/odd"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight=".5"
+                        android:text="odd 1.4"
+                        android:gravity="center"/>
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="25"
+                    android:id="@+id/status"
+                    android:visibility="gone"
+                    android:layout_margin="5dp"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

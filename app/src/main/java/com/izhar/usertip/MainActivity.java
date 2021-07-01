@@ -5,17 +5,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.view.Window;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,45 +34,46 @@ import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private Dialog loading;
     private List<Game> games;
     private GameAdapter adapter;
     private RecyclerView recyclerView;
-    private DatabaseReference data;
-    private ProgressBar progress;
     private TextView not_posted, not_verified;
+
+    private final Handler handler = new Handler();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle("Today's tip");
+        showLoading();
         init();
+        handler.postDelayed(checkInternet, 2000);
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseDatabase.getInstance().getReference("users").child(uid).child("account_status")
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.getValue().toString().equalsIgnoreCase("verified")){
-                            load();
+                                load();
                         }
                         else {
                             not_verified.setVisibility(View.VISIBLE);
-                            progress.setVisibility(View.GONE);
+                            loading.dismiss();
                         }
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-
+                        Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
     private void init() {
         recyclerView = findViewById(R.id.recycler);
-        progress = findViewById(R.id.progress);
         not_posted = findViewById(R.id.not_posted);
         not_verified = findViewById(R.id.not_verified);
-
     }
 
     @Override
@@ -78,22 +85,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
-        return false;
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.settings){
             startActivity(new Intent(this, Settings.class));
+            finish();
         }
-        return false;
+        return true;
     }
 
     private void load(){
         games = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
-        data = FirebaseDatabase.getInstance().getReference(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
+        DatabaseReference data = FirebaseDatabase.getInstance().getReference("vip").child(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
         data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -108,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     not_posted.setVisibility(View.VISIBLE);
                 }
-                progress.setVisibility(View.GONE);
+                loading.dismiss();
             }
 
             @Override
@@ -116,5 +124,31 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private final Runnable checkInternet = new Runnable() {
+        public void run() {
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            NetworkInfo[] info = connectivityManager.getAllNetworkInfo();
+            int connected = 0;
+            View view = findViewById(R.id.recycler);
+            for (NetworkInfo networkInfo : info) {
+                if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
+                    connected = 1;
+                }
+            }
+            if (connected == 0) {
+                Snackbar.make(view, "please connect to internet", Snackbar.LENGTH_INDEFINITE).show();
+            }
+            handler.postDelayed(this, 3000);
+        }
+    };
+    private void showLoading(){
+        loading = new Dialog(this);
+        loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        loading.setCancelable(false);
+        loading.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        loading.setContentView(R.layout.loading);
+        loading.show();
     }
 }

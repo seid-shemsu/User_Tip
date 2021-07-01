@@ -40,6 +40,7 @@
                 android:layout_marginVertical="5dp"
                 android:background="@drawable/round"
                 android:backgroundTint="@color/white"
+                android:inputType="textEmailAddress"
                 android:drawableLeft="@drawable/email"
                 android:drawablePadding="15dp"
                 android:hint="email"
